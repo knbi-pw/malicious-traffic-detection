@@ -137,3 +137,10 @@ dmypy.json
 /Weibo/
 /data/
 /pics/
+**/data_OK
+**/images
+**/diagrams
+**/plots
+**/models
+**/preprocess_result*
+*.7z
