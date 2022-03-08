@@ -30,9 +30,9 @@ def main():
 
     model = LeNetModel(config["epochs"], config["steps_per_epoch"], config["validation_steps"])
     batch_size = config["batch_size"]
-    # train_gen = ImageBatchGenerator(config["train_images"], config["train_labels"], batch_size, config["shuffle"])
-    # test_gen = ImageBatchGenerator(config["test_images"], config["test_labels"], batch_size, config["shuffle"])
-    history = model.model_build([], [])
+    train_gen = ImageBatchGenerator(config["train_images"], config["train_labels"], batch_size, config["shuffle"])
+    test_gen = ImageBatchGenerator(config["test_images"], config["test_labels"], batch_size, config["shuffle"])
+    history = model.model_build(train_gen, test_gen)
 
     if config["model"] is not None:
         model.model_save(config["model"])
