@@ -58,7 +58,7 @@ class ArrayBatchGenerator(keras.utils.Sequence):
         end_idx = start_idx + self.batch_size
 
         with open(self.images_fname, 'rb') as f, open(self.labels_fname, 'rb') as g:
-            f.seek(start_idx * self.fsize_x)
+            f.seek(start_idx * self.fsize_x)   # TODO: rozmiar tablcy
             g.seek(start_idx)
             while current_idx * self.fsize_x < end_idx * self.fsize_x:
                 img_data_x = f.read(self.fsize_x)
