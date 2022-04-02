@@ -60,7 +60,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    x = load_data(r"./images/test", count_per_file=15)
+    x = load_data(args.data, count_per_file=15)
     model = keras.models.load_model(args.model)
     predicted = model.predict(np.array([x[0]]))
 
