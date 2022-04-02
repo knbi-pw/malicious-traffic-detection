@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from tensorflow import keras
 
 from ml.common import byte_arr_to_int_arr
 from ml.cnn.lenet import LeNetModel
@@ -52,22 +53,16 @@ def load_data(data_dir, count_per_file=None):
 
 def parse_args():
     ap = argparse.ArgumentParser()
-    ap.add_argument("-j", "--json_config_path", required=True,
-                    help="path to the JSON config file")
-
-    args = vars(ap.parse_args())
-    return args
+    ap.add_argument("-d", "--data", required=True, help="Path to the test data")
+    ap.add_argument("-m", "--model", required=True, help="Path to the trained model")
+    return ap.parse_args()
 
 
 def main():
-    argument = parse_args()
-    config = read_json(argument["json_config_path"])
-    model = LeNetModel(config["epochs"], config["steps_per_epoch"], config["validation_steps"])
-    x = load_data(config["data_dir"])
-    model_path = config["model"]
-    model.model_load(model_path)
-    y = model.model_predict(x)
-    prediction = pd.DataFrame(y, columns=['predictions']).to_csv(config["prediction_path"])
+    args = parse_args()
+    x = load_data(r"./images/test", count_per_file=15)
+    model = keras.models.load_model(args.model)
+    predicted = model.predict(np.array([x[0]]))
 
 
 if __name__ == "__main__":
