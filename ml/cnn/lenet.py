@@ -18,9 +18,8 @@ class LeNetModel:
         self.model.add(Conv2D(filters=16, kernel_size=(3, 3), activation='relu'))
         self.model.add(MaxPooling2D())
         self.model.add(Flatten())
-        self.model.add(Dense(units=120, activation='relu'))
-        self.model.add(Dense(units=84, activation='relu'))
-        self.model.add(Dense(units=10, activation='softmax'))
+        self.model.add(Dense(units=1024, activation='relu'))
+        self.model.add(Dense(units=2, activation='softmax'))
         self.model.summary()
         self.model.compile(optimizer='adam',
                            loss='sparse_categorical_crossentropy',
