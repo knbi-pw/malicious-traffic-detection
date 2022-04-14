@@ -31,12 +31,14 @@ class DeepModel:
         tf.config.threading.set_inter_op_parallelism_threads(1)
         with tf.device('/CPU:0'):
             model = Sequential()
-            model.add(Conv1D(filters=32, kernel_size=5, activation='relu', input_shape=(1028,1)))
+            model.add(Conv1D(filters=32, kernel_size=5, activation='relu', input_shape=(1024,1)))
             model.add(Conv1D(filters=64, kernel_size=5, activation='relu'))
             model.add(MaxPool1D(pool_size=8))
             model.add(LSTM(units=200, return_sequences=True))
+            model.add(Flatten())
             model.add(Dense(units=200, activation='relu'))
             model.add(Dense(units=200, activation='relu'))
+            model.add(Dense(units=1, activation='relu'))
             model.summary()
 
             model.compile(optimizer='adam',
