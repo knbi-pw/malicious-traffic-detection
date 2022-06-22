@@ -54,20 +54,19 @@ class LeNetTorchWrapper:
 
         return self.train(train, test)
 
-    def train(self, train, test):
-        nb_train = train.shape[0]
-        nb_epoch = 75000
-        nb_index = 0
-        nb_batch = 4
+    def train(self, train, test, epoch_info_freq=1):
+        train_size = train.shape[0]
+        sample_index = 0
+        batch_size = 4
 
-        for epoch in range(nb_epoch):
-            if nb_index + nb_batch >= nb_train:
-                nb_index = 0
+        for epoch in range(self.epochs):
+            if sample_index + batch_size >= train_size:
+                sample_index = 0
             else:
-                nb_index = nb_index + nb_batch
+                sample_index = sample_index + batch_size
 
-            mini_data = Variable(train[nb_index:(nb_index + nb_batch)].clone())
-            mini_label = Variable(test[nb_index:(nb_index + nb_batch)].clone(), requires_grad=False)
+            mini_data = Variable(train[sample_index:(sample_index + batch_size)].clone())
+            mini_label = Variable(test[sample_index:(sample_index + batch_size)].clone(), requires_grad=False)
             mini_data = mini_data.type(torch.FloatTensor)
             mini_label = mini_label.type(torch.LongTensor)
             if self.use_gpu:
@@ -75,12 +74,12 @@ class LeNetTorchWrapper:
                 mini_label = mini_label.cuda()
             self.optimizer.zero_grad()
             mini_out = self.model(mini_data)
-            mini_label = mini_label.view(nb_batch)
+            mini_label = mini_label.view(batch_size)
             mini_loss = self.criterion(mini_out, mini_label)
             mini_loss.backward()
             self.optimizer.step()
 
-            if (epoch + 1) % 2000 == 0:
+            if (epoch + 1) % epoch_info_freq == 0:
                 print("Epoch = %d, Loss = %f" % (epoch + 1, mini_loss.data[0]))
 
     def save(self, path):
@@ -97,7 +96,7 @@ class LeNetTorchWrapper:
 
 def main():
     net = LeNetTorchWrapper(epochs=1, steps_per_epoch=10, validation_steps=10, use_gpu=False)
-    net.build()
+    net.train()
 
 
 if __name__ == "__main__":
