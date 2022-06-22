@@ -1,3 +1,6 @@
+from argparse import ArgumentParser
+
+import numpy as np
 import torch
 
 from torch import nn, optim
@@ -56,10 +59,15 @@ class LeNetTorchWrapper:
 
         return self.train(train, test)
 
-    def train(self, train, test, epoch_info_freq=1):
-        train_size = train.shape[0]
+    def train(self, train_data, labels, epoch_info_freq=1):
+        train_size = train_data.shape[0]
         sample_index = 0
-        batch_size = 4
+        batch_size = 100
+
+        if isinstance(train_data, np.ndarray):
+            train_data = torch.from_numpy(train_data)
+        if isinstance(labels, np.ndarray):
+            labels = torch.from_numpy(labels)
 
         for epoch in range(self.epochs):
             if sample_index + batch_size >= train_size:
@@ -67,8 +75,8 @@ class LeNetTorchWrapper:
             else:
                 sample_index = sample_index + batch_size
 
-            mini_data = Variable(train[sample_index:(sample_index + batch_size)].clone())
-            mini_label = Variable(test[sample_index:(sample_index + batch_size)].clone(), requires_grad=False)
+            mini_data = Variable(train_data[sample_index:(sample_index + batch_size)].clone())
+            mini_label = Variable(labels[sample_index:(sample_index + batch_size)].clone(), requires_grad=False)
             mini_data = mini_data.type(torch.FloatTensor)
             mini_label = mini_label.type(torch.LongTensor)
             if self.use_gpu:
@@ -97,21 +105,23 @@ class LeNetTorchWrapper:
 
 
 def main():
-    train_images = ""
-    train_labels = ""
-    test_images = ""
-    test_labels = ""
-    batch_size = 100
+    parser = ArgumentParser()
+    parser.add_argument("--data_directory", required=True, type=str)
+    args = parser.parse_args()
+    direcotry = args.data_directory
+    train_images = f"./{direcotry}/train_images.ubyte"
+    train_labels = f"./{direcotry}/train_labels.ubyte"
+    # test_images = f"./{direcotry}/test_images.ubyte"
+    # test_labels = f"./{direcotry}/test_labels.ubyte"
+    sample_count = 100000
     shuffle = True
 
+    train_gen = ImageBatchGenerator(train_images, train_labels, sample_count, shuffle)
 
-    train_gen = ImageBatchGenerator(train_images, train_labels, batch_size, shuffle)
-    test_gen = ImageBatchGenerator(test_images, test_labels, batch_size, shuffle)
-
-    train = train_gen.read_input(0)
-    test = test_gen.read_input(0)
+    train_x, train_y = train_gen.read_input(0)
+    train_x, train_y = train_gen.reshape_batch_data(train_x, train_y)
     net = LeNetTorchWrapper(epochs=1, steps_per_epoch=10, validation_steps=10, use_gpu=False)
-    net.train()
+    net.train(np.array(train_x), np.array(train_y))
 
 
 if __name__ == "__main__":
