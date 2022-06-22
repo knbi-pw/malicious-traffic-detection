@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from datetime import datetime
 
 import numpy
 import numpy as np
@@ -42,12 +43,18 @@ class LeNetTorch(nn.Module):
 class LeNetTorchWrapper:
     """ Based on: https://www.kaggle.com/code/usingtc/lenet-with-pytorch/script """
 
-    def __init__(self, epochs, steps_per_epoch, validation_steps, img_w=28, img_h=28, use_gpu=True):
+    def __init__(self, epochs, steps_per_epoch, validation_steps, batch_size=100, img_w=28, img_h=28, use_gpu=True):
         super().__init__()
         self.epochs = epochs
+        self.batch_size = batch_size
+
         self.steps_per_epoch = steps_per_epoch
         self.validation_steps = validation_steps
+
         self.model = LeNetTorch(img_w, img_h)
+        self.img_w = img_w
+        self.img_h = img_h
+
         self.use_gpu = use_gpu
 
         self.criterion = nn.CrossEntropyLoss()
@@ -57,13 +64,11 @@ class LeNetTorchWrapper:
             self.model = self.model.cuda()
 
     def build(self, train, test):
-
         return self.train(train, test)
 
-    def train(self, train_data, labels, epoch_info_freq=1):
+    def train(self, train_data: np.ndarray, labels: np.ndarray, epoch_info_freq: int = 1):
         train_size = train_data.shape[0]
         sample_index = 0
-        batch_size = 100
 
         if isinstance(train_data, np.ndarray):
             train_data = torch.from_numpy(train_data)
@@ -71,13 +76,13 @@ class LeNetTorchWrapper:
             labels = torch.from_numpy(labels)
 
         for epoch in range(self.epochs):
-            if sample_index + batch_size >= train_size:
+            if sample_index + self.batch_size >= train_size:
                 sample_index = 0
             else:
-                sample_index = sample_index + batch_size
+                sample_index = sample_index + self.batch_size
 
-            mini_data = Variable(train_data[sample_index:(sample_index + batch_size)].clone())
-            mini_label = Variable(labels[sample_index:(sample_index + batch_size)].clone(), requires_grad=False)
+            mini_data = Variable(train_data[sample_index:(sample_index + self.batch_size)].clone())
+            mini_label = Variable(labels[sample_index:(sample_index + self.batch_size)].clone(), requires_grad=False)
             mini_data = mini_data.type(torch.FloatTensor)
             mini_label = mini_label.type(torch.LongTensor)
             if self.use_gpu:
@@ -85,20 +90,23 @@ class LeNetTorchWrapper:
                 mini_label = mini_label.cuda()
             self.optimizer.zero_grad()
             mini_out = self.model(mini_data)
-            mini_label = mini_label.view(batch_size)
+            mini_label = mini_label.view(self.batch_size)
             mini_loss = self.criterion(mini_out, mini_label)
             mini_loss.backward()
             self.optimizer.step()
 
             if (epoch + 1) % epoch_info_freq == 0:
-                print(f"Epoch = {epoch+1}, Loss = {mini_loss.item()}")
+                print(f"Epoch = {epoch + 1}, Loss = {mini_loss.item()}")
 
-    def save(self, path):
-        raise NotImplementedError
-        # self.model.save(path)
+    def save(self, path: str):
+        torch.save(self.model.state_dict(), path)
 
-    def load(self, path):
-        raise NotImplementedError
+    def save_onnx(self, path: str):
+        model_input = torch.randn(self.batch_size, 1, self.img_h, self.img_w, requires_grad=True)
+        torch.onnx.export(self.model, model_input, path)
+
+    def load(self, path: str):
+        self.model.load_state_dict(torch.load(path))
 
     def predict(self, test_input):
         raise NotImplementedError
@@ -106,10 +114,8 @@ class LeNetTorchWrapper:
 
 
 def prepare_data_for_torch(train_x: numpy.ndarray, train_y: numpy.ndarray):
-    return np.array(train_x).reshape(100000, 1, 28, 28), \
-        np.array(train_y).reshape(100000, 1)
-
-    pass
+    return np.array(train_x).reshape(train_x.shape[0], 1, train_x.shape[1], train_x.shape[2]), \
+           np.array(train_y).reshape(train_y.shape[0], 1)
 
 
 def main():
@@ -128,9 +134,10 @@ def main():
 
     train_x, train_y = train_gen.read_input(0)
     train_x, train_y = train_gen.reshape_batch_data(train_x, train_y)
-    train_x, train_y = prepare_data_for_torch(train_x, train_y)
-    net = LeNetTorchWrapper(epochs=100, steps_per_epoch=10, validation_steps=10, use_gpu=False)
+    train_x, train_y = prepare_data_for_torch(np.array(train_x), np.array(train_y))
+    net = LeNetTorchWrapper(epochs=200, steps_per_epoch=10, validation_steps=10, use_gpu=False)
     net.train(np.array(train_x), np.array(train_y))
+    net.save_onnx(f'cnn_torch_{datetime.today().strftime("%Y%m%d_%H%M%S")}.onnx')
 
 
 if __name__ == "__main__":
