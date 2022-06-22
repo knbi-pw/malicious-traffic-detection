@@ -4,6 +4,8 @@ from torch import nn, optim
 from torch.autograd import Variable
 import torch.nn.functional as F
 
+from ml.image_batch_generator import ImageBatchGenerator
+
 
 class LeNetTorch(nn.Module):
     """ Based on: https://www.kaggle.com/code/usingtc/lenet-with-pytorch/script """
@@ -95,6 +97,19 @@ class LeNetTorchWrapper:
 
 
 def main():
+    train_images = ""
+    train_labels = ""
+    test_images = ""
+    test_labels = ""
+    batch_size = 100
+    shuffle = True
+
+
+    train_gen = ImageBatchGenerator(train_images, train_labels, batch_size, shuffle)
+    test_gen = ImageBatchGenerator(test_images, test_labels, batch_size, shuffle)
+
+    train = train_gen.read_input(0)
+    test = test_gen.read_input(0)
     net = LeNetTorchWrapper(epochs=1, steps_per_epoch=10, validation_steps=10, use_gpu=False)
     net.train()
 
