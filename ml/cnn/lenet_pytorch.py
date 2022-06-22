@@ -129,7 +129,7 @@ def main():
     train_x, train_y = train_gen.read_input(0)
     train_x, train_y = train_gen.reshape_batch_data(train_x, train_y)
     train_x, train_y = prepare_data_for_torch(train_x, train_y)
-    net = LeNetTorchWrapper(epochs=1, steps_per_epoch=10, validation_steps=10, use_gpu=False)
+    net = LeNetTorchWrapper(epochs=100, steps_per_epoch=10, validation_steps=10, use_gpu=False)
     net.train(np.array(train_x), np.array(train_y))
 
 
