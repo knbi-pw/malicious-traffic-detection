@@ -17,19 +17,25 @@ class LeNetTorch(nn.Module):
 
     def __init__(self, img_width, img_height):
         super(LeNetTorch, self).__init__()
-        self.conv1 = nn.Conv2d(1, 1, (5, 5), padding=2)
-        self.conv2 = nn.Conv2d(1, 16, (5, 5))
+        self.conv1 = nn.Conv2d(1, 6, (5, 5), padding=2)
+        self.conv2 = nn.Conv2d(6, 16, (5, 5))
         self.fc1 = nn.Linear(16 * 5 * 5, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 2)
 
     def forward(self, x):
         x = F.max_pool2d(F.relu(self.conv1(x)), (2, 2))
+        # print(f"c1.shape = {x.shape}")
         x = F.max_pool2d(F.relu(self.conv2(x)), (2, 2))
+        # print(f"c2.shape = {x.shape}")
         x = x.view(-1, self.num_flat_features(x))
+        # print(f"view.shape = {x.shape}")
         x = F.relu(self.fc1(x))
+        # print(f"fc1.shape = {x.shape}")
         x = F.relu(self.fc2(x))
+        # print(f"fc2.shape = {x.shape}")
         x = self.fc3(x)
+        # print(f"fc3.shape = {x.shape}")
         return x
 
     def num_flat_features(self, x):
@@ -101,9 +107,11 @@ class LeNetTorchWrapper:
     def save(self, path: str):
         torch.save(self.model.state_dict(), path)
 
-    def save_onnx(self, path: str):
+    def save_onnx(self, path: str, opset: int = 13):
         model_input = torch.randn(self.batch_size, 1, self.img_h, self.img_w, requires_grad=True)
-        torch.onnx.export(self.model, model_input, path)
+        input_names = ['act']
+        output_names = ['out']
+        torch.onnx.export(self.model, model_input, path, input_names=input_names, output_names=output_names, opset_version=opset)
 
     def load(self, path: str):
         self.model.load_state_dict(torch.load(path))
@@ -137,7 +145,8 @@ def main():
     train_x, train_y = prepare_data_for_torch(np.array(train_x), np.array(train_y))
     net = LeNetTorchWrapper(epochs=200, steps_per_epoch=10, validation_steps=10, use_gpu=False)
     net.train(np.array(train_x), np.array(train_y))
-    net.save_onnx(f'cnn_torch_{datetime.today().strftime("%Y%m%d_%H%M%S")}.onnx')
+    net.save_onnx(f'cnn_torch_{datetime.today().strftime("%Y%m%d_%H%M%S")}.onnx',
+                  opset=10)
 
 
 if __name__ == "__main__":
