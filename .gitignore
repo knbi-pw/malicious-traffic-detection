@@ -142,5 +142,5 @@ dmypy.json
 **/diagrams
 **/plots
 **/models
-**/preprocess_result*
+preprocess_result
 *.7z

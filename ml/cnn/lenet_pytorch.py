@@ -1,3 +1,4 @@
+import random
 from argparse import ArgumentParser
 from datetime import datetime
 
@@ -10,6 +11,7 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 
 from ml.image_batch_generator import ImageBatchGenerator
+from ml.pcap_processor import handle_incorrect_write
 
 
 class LeNetTorch(nn.Module):
@@ -117,13 +119,34 @@ class LeNetTorchWrapper:
         self.model.load_state_dict(torch.load(path))
 
     def predict(self, test_input):
-        raise NotImplementedError
-        # return self.model.predict(test_input)
+        if isinstance(test_input, np.ndarray):
+            test_input = torch.from_numpy(test_input)
+        mini_data = Variable(test_input.clone())
+        mini_data = mini_data.type(torch.FloatTensor)
+        if self.use_gpu:
+            mini_data = mini_data.cuda()
+        self.optimizer.zero_grad()
+        mini_out = self.model(mini_data)
+
+        return  mini_out
 
 
 def prepare_data_for_torch(train_x: numpy.ndarray, train_y: numpy.ndarray):
     return np.array(train_x).reshape(train_x.shape[0], 1, train_x.shape[1], train_x.shape[2]), \
            np.array(train_y).reshape(train_y.shape[0], 1)
+
+def pick_2n_test_images(n, images, labels):
+    ones_list = [i for i, value in enumerate(labels) if value == 1]
+    zeros_list = [i for i, value in enumerate(labels) if value == 0]
+    x_set = []
+    y_set = []
+    y_set.append(random.sample(labels(ones_list),n))
+    y_set.append(random.sample(labels(zeros_list),n))
+    x_set.append(random.sample(labels(ones_list),n))
+    x_set.append(random.sample(labels(zeros_list),n))
+    return x_set, y_set
+
+
 
 
 def main():
@@ -133,20 +156,31 @@ def main():
     direcotry = args.data_directory
     train_images = f"./{direcotry}/train_images.ubyte"
     train_labels = f"./{direcotry}/train_labels.ubyte"
-    # test_images = f"./{direcotry}/test_images.ubyte"
-    # test_labels = f"./{direcotry}/test_labels.ubyte"
-    sample_count = 100000
+    test_images = f"./{direcotry}/test_images.ubyte"
+    test_labels = f"./{direcotry}/test_labels.ubyte"
+    sample_count = 1000000
     shuffle = True
 
     train_gen = ImageBatchGenerator(train_images, train_labels, sample_count, shuffle)
-
+    test_gen = ImageBatchGenerator(test_images, test_labels, sample_count, shuffle)
+    test_loader = torch.utils.data.DataLoader(test_labels, batch_size=100,
+                                              shuffle=False)
     train_x, train_y = train_gen.read_input(0)
-    train_x, train_y = train_gen.reshape_batch_data(train_x, train_y)
-    train_x, train_y = prepare_data_for_torch(np.array(train_x), np.array(train_y))
+    test_x, test_y = train_gen.read_input(0)
+    # train_x, train_y = train_gen.reshape_batch_data(train_x, train_y)
+    # #test_x, test_y = train_gen.reshape_batch_data(test_x, test_y)
+    # train_x, train_y = prepare_data_for_torch(np.array(train_x), np.array(train_y))
+    # #test_x, test_y = prepare_data_for_torch(np.array(train_x), np.array(train_y))
     net = LeNetTorchWrapper(epochs=200, steps_per_epoch=10, validation_steps=10, use_gpu=False)
+    net.load('cnn_torch20220624_160820.pt')
+    net.model.eval()
     net.train(np.array(train_x), np.array(train_y))
-    net.save_onnx(f'cnn_torch_{datetime.today().strftime("%Y%m%d_%H%M%S")}.onnx',
-                  opset=10)
+
+    #net.predict(np.array(train_x))
+    #net.save_onnx(f'cnn_onnx_{datetime.today().strftime("%Y%m%d_%H%M%S")}.onnx',opset=10)
+    #net.save(f'cnn_torch{datetime.today().strftime("%Y%m%d_%H%M%S")}.pt')
+
+
 
 
 if __name__ == "__main__":
