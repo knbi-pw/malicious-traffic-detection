@@ -118,9 +118,8 @@ class LeNetTorchWrapper:
     def load(self, path: str):
         self.model.load_state_dict(torch.load(path))
 
-    def predict(self, test_input):
-        if isinstance(test_input, np.ndarray):
-            test_input = torch.from_numpy(test_input)
+    def predict(self, test_input: np.ndarray):
+        test_input = torch.from_numpy(test_input)
         mini_data = Variable(test_input.clone())
         mini_data = mini_data.type(torch.FloatTensor)
         if self.use_gpu:
@@ -158,25 +157,23 @@ def main():
     train_labels = f"./{direcotry}/train_labels.ubyte"
     test_images = f"./{direcotry}/test_images.ubyte"
     test_labels = f"./{direcotry}/test_labels.ubyte"
-    sample_count = 1000000
+    sample_count = 10
     shuffle = True
 
     train_gen = ImageBatchGenerator(train_images, train_labels, sample_count, shuffle)
-    test_gen = ImageBatchGenerator(test_images, test_labels, sample_count, shuffle)
-    test_loader = torch.utils.data.DataLoader(test_labels, batch_size=100,
-                                              shuffle=False)
-    train_x, train_y = train_gen.read_input(0)
-    test_x, test_y = train_gen.read_input(0)
-    # train_x, train_y = train_gen.reshape_batch_data(train_x, train_y)
-    # #test_x, test_y = train_gen.reshape_batch_data(test_x, test_y)
-    # train_x, train_y = prepare_data_for_torch(np.array(train_x), np.array(train_y))
+
+    train_x, train_y = train_gen.read_input_raw(0)
+    test_x, test_y = train_gen.read_input_raw(0)
+    train_x, train_y = train_gen.reshape_batch_data(train_x, train_y)
+    train_x, train_y = prepare_data_for_torch(np.array(train_x), np.array(train_y))
     # #test_x, test_y = prepare_data_for_torch(np.array(train_x), np.array(train_y))
     net = LeNetTorchWrapper(epochs=200, steps_per_epoch=10, validation_steps=10, use_gpu=False)
     net.load('cnn_torch20220624_160820.pt')
-    net.model.eval()
-    net.train(np.array(train_x), np.array(train_y))
+    # net.model.eval()
+    # net.train(np.array(train_x), np.array(train_y))
 
-    #net.predict(np.array(train_x))
+    result = net.predict(np.array(train_x))
+    print(result)
     #net.save_onnx(f'cnn_onnx_{datetime.today().strftime("%Y%m%d_%H%M%S")}.onnx',opset=10)
     #net.save(f'cnn_torch{datetime.today().strftime("%Y%m%d_%H%M%S")}.pt')
 

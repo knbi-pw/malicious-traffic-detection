@@ -45,7 +45,7 @@ class ImageBatchGenerator(keras.utils.Sequence):
 
     def __getitem__(self, idx):
         logging.debug(f"Starting __getitem__(self, {idx})")
-        batch_x, batch_y = self.read_input(idx)
+        batch_x, batch_y = self.read_input_raw(idx)
         batch_x, batch_y = self.reshape_batch_data(batch_x, batch_y)
 
         if self.shuffle:
@@ -59,7 +59,7 @@ class ImageBatchGenerator(keras.utils.Sequence):
 
         return batch_x, batch_y
 
-    def read_input(self, idx):
+    def read_input_raw(self, idx):
         x_data = []
         y_data = []
 
@@ -82,3 +82,9 @@ class ImageBatchGenerator(keras.utils.Sequence):
                     break
         logging.debug(f"[BatchGenerator __read_input__] read {len(x_data[0])} bytes successfully")
         return x_data, y_data
+
+    def read_input_numpy(self, idx):
+        x, y = self.read_input_raw(idx)
+        x, y = self.reshape_batch_data(x, y)
+
+        return np.array(x), np.array(y)

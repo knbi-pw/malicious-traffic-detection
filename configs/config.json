@@ -1,5 +1,5 @@
 {
-  "data_dir" : "images",
+  "data_dir" : "data_OK/images",
   "json" : "configs/USTC-TFC2016_full_config.json",
   "pcap_count" : 50000,
   "display_images": false
