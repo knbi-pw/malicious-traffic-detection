@@ -15,8 +15,9 @@ def main():
     shuffle = False
 
     gen = ImageBatchGenerator(data, labels, sample_count, shuffle)
-    x, y = gen.read_input_numpy(idx=0)
-    print(f"mean: {x.mean()}, stdev: {x.std()}")
+    x, _ = gen.read_input_numpy(idx=0)
+    x = gen.normalize(x)
+    print(f"mean: {x.mean():.3f}, stdev: {x.std():.3f}")
 
 
 if __name__ == "__main__":

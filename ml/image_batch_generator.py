@@ -52,12 +52,16 @@ class ImageBatchGenerator(keras.utils.Sequence):
             batch_x, batch_y = shuffle_dataset_in_unision(batch_x, batch_y)
 
         logging.debug(f"[BatchGenerator __getitem__] Batch_x shape: {len(batch_x[0])}")
-        batch_x = keras.utils.normalize(batch_x)
+        batch_x = self.normalize(batch_x)
         batch_x = np.array(batch_x)
         batch_y = np.array(batch_y)
         logging.debug(f"batch_x.shape = {batch_x.shape}, batch_y = {batch_y.shape}")
 
         return batch_x, batch_y
+
+    @staticmethod
+    def normalize(arr):
+        return keras.utils.normalize(arr)
 
     def read_input_raw(self, idx):
         x_data = []
