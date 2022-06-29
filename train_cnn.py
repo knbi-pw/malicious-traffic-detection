@@ -1,6 +1,8 @@
 import argparse
 import logging
 import json
+import time
+from datetime import datetime
 from enum import Enum
 
 import ml.common
@@ -49,13 +51,24 @@ def main():
     batch_size = config["batch_size"]
     train_gen = ImageBatchGenerator(config["train_images"], config["train_labels"], batch_size, config["shuffle"])
     test_gen = ImageBatchGenerator(config["test_images"], config["test_labels"], batch_size, config["shuffle"])
+    start_t = time.time()
     history = model.model_build(train_gen, test_gen)
+    print(f"Training took: {time.time() - start_t:3f}s")
 
-    if config["model"] is not None:
-        model.model_save(config["model"])
+    if argument["model_type"] == ModelType.lenet:
+        model_name = "lenet"
+    else:
+        model_name = "novel"
+
+    save = True
+    date_str = f'{datetime.today().strftime("%Y%m%d_%H%M%S")}'
+    save_name = f"{model_name}_{date_str}"
+
+    if save:
+        model.model_save(save_name)
     if config["plot"] == 1:
         logging.getLogger().setLevel(logging.WARNING)
-        ml.common.plot_accuracy(history)
+        ml.common.plot_accuracy(history, fname=f"{save_name}", batch_size=batch_size)
 
 
 if __name__ == "__main__":

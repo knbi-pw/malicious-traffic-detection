@@ -7,8 +7,9 @@ from ml.file_parser import Parser
 
 
 class CNNParser(Parser):
-    def __init__(self, filename, image_size=28, max_count=50000, shuffle=False, display=False):
-        super().__init__(filename)
+    def __init__(self, filename: str, image_size=28, max_count=50000, shuffle=False, display=False,
+                 directory: str = ""):
+        super().__init__(directory + filename)
         self.image_size = image_size
         self.image_byte_count = self.image_size * self.image_size
 

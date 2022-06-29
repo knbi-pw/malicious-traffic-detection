@@ -50,7 +50,8 @@ def create_output_path(directory, pcap_path, extension='ubyte'):
 
 
 class PcapProcessor:
-    def __init__(self, parser: Type[Parser], result_dir: str, pcaps_data: Dict[str, int], max_pcap_count: int = None):
+    def __init__(self, parser: Type[Parser], result_dir: str, pcaps_data: Dict[str, int], max_pcap_count: int = None,
+                 input_dir: str = ""):
         try_create_directory(result_dir)
 
         self.parser = parser
@@ -59,6 +60,8 @@ class PcapProcessor:
         self.fname_train_labels = create_output_path(result_dir, "train_labels")
         self.fname_test_images = create_output_path(result_dir, "test_images")
         self.fname_test_labels = create_output_path(result_dir, "test_labels")
+        self.input_dir = input_dir
+
         self.max_pcap_count = max_pcap_count
         self.pcaps_data = pcaps_data
 
@@ -68,7 +71,8 @@ class PcapProcessor:
 
             start = time.time()
 
-            parser = self.parser(filename=pcap_path, max_count=self.max_pcap_count, shuffle=True)
+            parser = self.parser(filename=pcap_path, max_count=self.max_pcap_count, shuffle=True,
+                                 directory=self.input_dir)
             process_pcap(parser, self.fname_train_images, self.fname_train_labels, self.fname_test_images,
                          self.fname_test_labels,
                          test_percentage=0.1, label=self.pcaps_data[pcap_path])

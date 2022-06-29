@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import time
 
 import numpy as np
 import pandas as pd
@@ -60,9 +61,20 @@ def parse_args():
 
 def main():
     args = parse_args()
-    x = load_data(args.data, count_per_file=15)
+    x = load_data(args.data, count_per_file=1000)
     model = keras.models.load_model(args.model)
-    predicted = model.predict(np.array([x[0]]))
+    start = time.time()
+    print(f"size of x: {np.array(x).shape}")
+    count = 64
+    for i in range(count):
+        predicted = model.predict(np.array([x[i]]))
+
+    end = time.time()-start
+    print(f"Prediction of {count} imgs took: {end}")
+    print(f"Prediction single took: {end/count}")
+    # print(f"Input shape {np.array([x[0]]).shape}")
+    # print(f"Prediction shape {np.array(predicted).shape}")
+    # print(f"Prediction {predicted}")
 
 
 if __name__ == "__main__":
