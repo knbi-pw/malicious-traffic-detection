@@ -9,9 +9,9 @@ from ml.dl.deep_in_the_dark import DeepModel
 def main():
     logging.basicConfig(level=logging.DEBUG)
 
-    train_images = "preprocess_result/train_images.ubyte"
+    train_images = "preprocess_result/train_pcaps.ubyte"
     train_labels = "preprocess_result/train_labels.ubyte"
-    test_images = "preprocess_result/test_images.ubyte"
+    test_images = "preprocess_result/test_pcaps.ubyte"
     test_labels = "preprocess_result/test_labels.ubyte"
 
     histories = []
