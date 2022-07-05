@@ -3,7 +3,7 @@ import logging
 
 from common import load_json_config
 from ml.dl.dl_parser import DeepParser
-from ml.pcap_processor import PcapProcessor
+from ml.pcap_processor_dl import PcapProcessor
 
 
 def parse_args():
@@ -11,7 +11,7 @@ def parse_args():
         description='This script creates binary files containing labels and images generated from the pcaps')
     parser.add_argument('-j', '--json', type=str,
                         help="Path to the JSON configuration file containing pcap paths with labels", required=True)
-    return parser.parse_args()
+    return parser.parse_args()git
 
 
 def main():
