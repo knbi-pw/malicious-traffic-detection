@@ -44,7 +44,6 @@ class ArrayBatchGenerator(keras.utils.Sequence):
         return self.batches_count
 
     def __getitem__(self, idx):
-        logging.debug(f"Starting __getitem__(self, {idx})")
         batch_x, batch_y = self.read_input(idx)
         batch_x, batch_y = self.reshape_batch_data(batch_x, batch_y)
 
@@ -54,7 +53,6 @@ class ArrayBatchGenerator(keras.utils.Sequence):
         batch_x = keras.utils.normalize(batch_x)
         batch_x = np.array(batch_x)
         batch_y = np.array(batch_y)
-        logging.debug(f"batch_x.shape = {batch_x.shape}, batch_y.shape = {batch_y.shape}")
 
         return batch_x, batch_y
 
