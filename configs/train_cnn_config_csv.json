@@ -1,0 +1,12 @@
+{
+  "train_images" : "data/preprocessed/from_csv/biggest/train_images.ubyte",
+  "train_labels" : "data/preprocessed/from_csv/biggest/train_labels.ubyte",
+  "test_images" : "data/preprocessed/from_csv/biggest/test_images.ubyte",
+  "test_labels" : "data/preprocessed/from_csv/biggest/test_labels.ubyte",
+  "shuffle" : 1,
+  "plot" : 0,
+  "batch_size" :500,
+  "epochs" : 20,
+  "steps_per_epoch" : 100,
+  "validation_steps" : 20
+}

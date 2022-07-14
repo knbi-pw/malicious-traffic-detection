@@ -62,7 +62,7 @@ def main():
 
     save = True
     date_str = f'{datetime.today().strftime("%Y%m%d_%H%M%S")}'
-    save_name = f"{model_name}_{date_str}"
+    save_name = f"models/{model_name}_{date_str}"
 
     if save:
         model.model_save(save_name)
