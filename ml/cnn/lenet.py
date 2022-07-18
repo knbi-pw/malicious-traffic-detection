@@ -25,12 +25,20 @@ class LeNetModel:
                            loss='sparse_categorical_crossentropy',
                            metrics=['accuracy'])
 
-        history = self.model.fit(x=train_gen,
-                                 steps_per_epoch=self.steps_per_epoch,
-                                 epochs=self.epochs,
-                                 verbose=1,
-                                 validation_data=test_gen,
-                                 validation_steps=self.validation_steps)
+        if keras.__version__ == '2.1.6-tf':
+            history = self.model.fit_generator(generator=train_gen,
+                                               steps_per_epoch=self.steps_per_epoch,
+                                               epochs=self.epochs,
+                                               verbose=1,
+                                               validation_data=test_gen,
+                                               validation_steps=self.validation_steps)
+        else:
+            history = self.model.fit(x=train_gen,
+                                     steps_per_epoch=self.steps_per_epoch,
+                                     epochs=self.epochs,
+                                     verbose=1,
+                                     validation_data=test_gen,
+                                     validation_steps=self.validation_steps)
         return history
 
     def model_save(self, path):
@@ -41,3 +49,8 @@ class LeNetModel:
 
     def model_predict(self, test_input):
         return self.model.predict(test_input)
+
+    def model_save_json_h5(self, path):
+        self.model.save_weights(f"{path}.h5")
+        with open(f"{path}.json", "w") as f:
+            f.write(self.model.to_json())

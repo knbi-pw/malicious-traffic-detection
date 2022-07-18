@@ -2,8 +2,11 @@ import argparse
 import logging
 import json
 import time
+import tensorflow as tf
+
 from datetime import datetime
 from enum import Enum
+from tensorflow import keras
 
 import ml.common
 from ml.cnn.novel_cnn import NovelCnnModel
@@ -65,7 +68,12 @@ def main():
     save_name = f"models/{model_name}_{date_str}"
 
     if save:
-        model.model_save(save_name)
+        # model.model_save(f"{save_name}.h5")
+
+        if keras.__version__ == '2.1.6-tf':
+            model.model_save_json_h5(save_name)
+
+
     if config["plot"] == 1:
         logging.getLogger().setLevel(logging.WARNING)
         ml.common.plot_accuracy(history, fname=f"{save_name}", batch_size=batch_size)

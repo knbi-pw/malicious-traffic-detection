@@ -25,16 +25,29 @@ class NovelCnnModel:
                            loss='sparse_categorical_crossentropy',
                            metrics=['accuracy'])
 
-        history = self.model.fit(x=train_gen,
-                                 steps_per_epoch=self.steps_per_epoch,
-                                 epochs=self.epochs,
-                                 verbose=1,
-                                 validation_data=test_gen,
-                                 validation_steps=self.validation_steps)
+        if keras.__version__ == '2.1.6-tf':
+            history = self.model.fit_generator(generator=train_gen,
+                                               steps_per_epoch=self.steps_per_epoch,
+                                               epochs=self.epochs,
+                                               verbose=1,
+                                               validation_data=test_gen,
+                                               validation_steps=self.validation_steps)
+        else:
+            history = self.model.fit(x=train_gen,
+                                     steps_per_epoch=self.steps_per_epoch,
+                                     epochs=self.epochs,
+                                     verbose=1,
+                                     validation_data=test_gen,
+                                     validation_steps=self.validation_steps)
         return history
 
     def model_save(self, path):
         self.model.save(path)
+
+    def model_save_json_h5(self, path):
+        self.model.save_weights(f"{path}.h5")
+        with open(f"{path}.json", "w") as f:
+            f.write(self.model.to_json())
 
     def model_load(self, path):
         self.model = keras.models.load_model(path)
