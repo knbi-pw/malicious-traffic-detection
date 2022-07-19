@@ -9,10 +9,17 @@ E.g.:
     python train_cnn.py -j configs/train_cnn_config_csv.json --model_type novel
 
 Make sure that method `model_save_json_h5` is used.
-You should get three files as the result, e.g.: models/novel_20220719_174137.h5, models/novel_20220719_174137.json, which are needed for the next steps, and the last not used in the further process: models/novel_20220719_174137_default.h5
+You should get three files as the result, e.g.: 
+* models/novel_20220719_174137.h5, 
+* models/novel_20220719_174137.json, 
+ 
+which are needed for the next steps, and the last not used in the further process: 
+* models/novel_20220719_174137_default.h5
 
 ## Convert keras model to tensorflow 
-Use `keras_2_tf.py` from: https://github.com/695kede/xilinx-edge-ai/tree/master/docs/Keras-freeze to convert the keras model to pure tf. For example:
+Use `keras_2_tf.py` from: https://github.com/695kede/xilinx-edge-ai/tree/master/docs/Keras-freeze to convert the keras model to pure tf. 
+
+For example:
     
     python keras_2_tf.py --keras_json=models/novel_20220719_165733.json --keras_hdf5=models/novel_20220719_165733.h5 --tfckpt=models/novel_20220719_165733.ckpt --tf_graph=models/novel_20220719_165733.pb
 
@@ -27,13 +34,13 @@ and as the results you will get:
 
 ## Freezing the graph
 
-Quantization using other environment where the DNNDK is installed:
+Quantization using other environment where the DNNDK is installed (filenames and output_node_names might differ, look at `keras_2_tf.py` output):
 
- freeze_graph --input_graph=models/novel_20220717_113357.pb \
-             --input_checkpoint=models/novel_20220717_113357.ckpt \
-             --input_binary=true \
-             --output_graph=./models/novel_20220717_113357_frozen_graph.pb \
-             --output_node_names=dense_1/Softmax
+    freeze_graph --input_graph=models/novel_20220717_113357.pb \
+                 --input_checkpoint=models/novel_20220717_113357.ckpt \
+                 --input_binary=true \
+                 --output_graph=./models/novel_20220717_113357_frozen_graph.pb \
+                 --output_node_names=dense_1/Softmax
 
 Here you provide: 
 * \*.ckpt\* files,
