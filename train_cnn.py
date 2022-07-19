@@ -66,12 +66,14 @@ def main():
     save = True
     date_str = f'{datetime.today().strftime("%Y%m%d_%H%M%S")}'
     save_name = f"models/{model_name}_{date_str}"
+    print(f"Saving {save_name}")
 
     if save:
-        # model.model_save(f"{save_name}.h5")
+        model.model_save(f"{save_name}_default.h5")
+        model.model_save_json_h5(save_name)
 
-        if keras.__version__ == '2.1.6-tf':
-            model.model_save_json_h5(save_name)
+        # if keras.__version__ == '2.1.6-tf':
+        #     model.model_save_json_h5(save_name)
 
 
     if config["plot"] == 1:
