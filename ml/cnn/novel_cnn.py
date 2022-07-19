@@ -1,5 +1,5 @@
 from tensorflow import keras
-from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPooling2D
+from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, InputLayer
 from tensorflow.keras.models import Sequential
 
 
@@ -13,12 +13,18 @@ class NovelCnnModel:
         self.model = Sequential()
 
     def model_build(self, train_gen=None, test_gen=None):
-        self.model.add(Dense(units=256, activation='relu', input_shape=(28, 28, 1)))
+        # self.model.add(InputLayer(input_shape=(28, 28, 1)))
+        self.model.add(Conv2D(filters=6, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)))
+        # self.model.add(Dense(units=256, activation='relu', input_shape=(28, 28, 1)))
         self.model.add(Conv2D(filters=6, kernel_size=(3, 3), activation='relu'))
+        self.model.add(Conv2D(filters=6, kernel_size=(3, 3), activation='relu'))
+        self.model.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu'))
         self.model.add(MaxPooling2D())
-        self.model.add(Conv2D(filters=16, kernel_size=(3, 3), activation='relu'))
+        self.model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
         self.model.add(MaxPooling2D())
         self.model.add(Flatten())
+        self.model.add(Dense(units=1024, activation='relu'))
+        self.model.add(Dense(units=256, activation='relu'))
         self.model.add(Dense(units=2, activation='softmax'))
         self.model.summary()
         self.model.compile(optimizer='adam',
